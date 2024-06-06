@@ -14,50 +14,23 @@ typedef struct array{
     struct array *next;
 } Array;
 
-void excElement(Array *first, char c) {
+void bobbleSort(Array *first) {
 
-    Array *aux;
+    int flag = 0;
 
-    if(first->c == c) {
-        aux = first;
-        first = first->next;
-        free(aux);
-    } 
-    else {
-        Array *current = first;
-    
-        while (current != NULL) {
-            
-            if(current->next->c == c) {
+    for(Array *pointer = first; pointer != NULL; pointer = pointer->next) {
 
-                aux = current->next;
-                current->next = current->next->next;
-                free(aux);
-                break; 
+        for(Array *current = first; current->next != NULL; current = current->next) {
+
+            if(current->qtd > current->next->qtd) {
+
+                
             }
         }
-    }
-}
 
-Array findMin(Array *first) {
-
-    Array aux;
-    aux.c = first->c;
-    aux.qtd = first->qtd;
-    aux.next = NULL;
-
-    for(Array *current = first; current != NULL; current = current->next) {
-        
-        if(aux.qtd > current->qtd) {
-        
-            aux.qtd = current->qtd;
-            aux.c = current->c;
-        }
+        if(!flag) break;
     }
 
-    excElement(first, aux.c);
-
-    return aux;
 }
 
 Huffman* topHeap( Huffman *aux1, Huffman *aux2) {
@@ -183,7 +156,7 @@ int main() {
         printf("Erro ao abrir o arquivo");
         exit(1);
     }
-    
+
     Array *first = NULL;
     Huffman *root = NULL;
     char c;
@@ -197,5 +170,5 @@ int main() {
 
     makeHuffman(root, first);
 
-    return 1;
+    return 0;
 }
