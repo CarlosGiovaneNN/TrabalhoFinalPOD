@@ -24,13 +24,59 @@ void bobbleSort(Array *first) {
 
             if(current->qtd > current->next->qtd) {
 
-                
+                int aux;
+                char auxc;
+
+                aux = current->qtd;
+                current->qtd = current->next->qtd;
+                current->next->qtd = aux;
+
+                auxc = current->c;
+                current->c = current->next->c;
+                current->next->c = auxc;
+
+                flag = 1;                
+            }
+            else if(current->qtd == current->next->qtd & current->c > current->next->c ) {
+
+                int aux;
+                char auxc;
+
+                aux = current->qtd;
+                current->qtd = current->next->qtd;
+                current->next->qtd = aux;
+
+                auxc = current->c;
+                current->c = current->next->c;
+                current->next->c = auxc;
+
+                flag = 1;                
             }
         }
 
         if(!flag) break;
     }
+}
 
+void bobbleSort(Huffman *vector[], int size) {
+
+    int flag = 0;
+
+    for(int i = size; i >= 0; i--) {
+
+        for(int j = 0; vector[j+1] != NULL; j++) {
+
+            if(vector[j]->data > vector[j+1]->data) {
+
+                int aux;
+                aux = vector[j]->data;
+                vector[j]->data = vector[j+1]->data;
+                vector[j+1]->data = aux;
+                flag = 1;
+            }
+        }
+        if(!flag) break;
+    }
 }
 
 Huffman* topHeap( Huffman *aux1, Huffman *aux2) {
@@ -53,11 +99,10 @@ Huffman* topHeap( Huffman *aux1, Huffman *aux2) {
 
 Huffman* midHeap(Huffman *side, Array *first) {
 
-    Array min = findMin(first);
     Huffman *root = (Huffman*)malloc(sizeof(Huffman));
     Huffman *otherSide = (Huffman*)malloc(sizeof(Huffman));
 
-    otherSide->data = min.c;
+    otherSide->data = first->c;
     otherSide->one = NULL;
     otherSide->zero = NULL;
 
@@ -71,7 +116,11 @@ Huffman* midHeap(Huffman *side, Array *first) {
         root->one = otherSide;
     }
 
-    root->data = min.qtd + side->data;
+    root->data = first->qtd + side->data;
+
+    Array *aux = first;
+    first = first->next;
+    free(aux);
 
     return root;
 }
@@ -81,18 +130,20 @@ Huffman* minHeap(Array *first) {
     Huffman *root = (Huffman*)malloc(sizeof(Huffman));
     Huffman *aux1 = (Huffman*)malloc(sizeof(Huffman));
     Huffman *aux2 = (Huffman*)malloc(sizeof(Huffman));
-    Array min1 = findMin(first);
-    Array min2 = findMin(first);
     
-    aux1->data = min1.c;
+    
+    Array *min1 = first;
+    Array *min2 = first;
+
+    aux1->data = min1->c;
     aux1->one = NULL;
     aux1->zero = NULL;    
-    aux2->data = min2.c;
+    aux2->data = min2->c;
     aux2->one = NULL;
     aux2->zero = NULL;
 
     
-    if(min2.qtd >= min2.qtd) {
+    if(min2->qtd >= min2->qtd) {
 
         root->zero = aux1;
         root->one = aux2;
@@ -102,7 +153,10 @@ Huffman* minHeap(Array *first) {
         root->one = aux2;
     }
 
-    root->data = min1.qtd + min2.qtd;
+    root->data = min1->qtd + min2->qtd;
+    first = first->next->next;
+    free(min1);
+    free(min2);
 
     return root;
 }
@@ -112,7 +166,29 @@ void makeHuffman(Huffman *root, Array *first) {
     int count = 0;
     for(Array *current = first; current != NULL; current = current->next) count++;
     
-    //n sei o que fazer
+    Huffman *vector[count]; 
+    int position = 0;
+
+    while (first != NULL) {
+        
+        if(first->qtd == first->next->qtd) {
+
+            vector[position] = minHeap(first);
+            position++;
+
+            if(first->qtd != first->next->qtd) {
+                vector[position] = midHeap(vector[position-1], first);
+                position++;
+            }
+            bobbleSort(vector);
+        }
+        else if(first->qtd != first->next->qtd) {
+                vector[position] = midHeap(vector[position-1], first);
+                position++;
+        }
+
+    }
+    
 }
 
 void add(Array *first, char c) {
