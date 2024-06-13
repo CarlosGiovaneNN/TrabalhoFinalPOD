@@ -2,228 +2,146 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+#define ASCII 128
+#define COUNT 10
+
 typedef struct huffman{
-    unsigned data;
+    char data;
+    int oc;
     struct huffman *zero;
     struct huffman *one;    
 } Huffman;
 
-typedef struct array{
-    char c;
-    int qtd;
-    struct array *next;
-} Array;
-
-void bobbleSort(Array *first) {
-
+void add(char vector[], int qtd[], char c, int *size) {
+    
     int flag = 0;
 
-    for(Array *pointer = first; pointer != NULL; pointer = pointer->next) {
+    for (int i = 0; i < *size; i++) {
+        if (vector[i] == c) {
+            qtd[i]++;
+            flag = 1;
+            break;
+        }
+    }
 
-        for(Array *current = first; current->next != NULL; current = current->next) {
+    if (!flag) {
+        vector[*size] = c;
+        qtd[*size] = 1;
+        (*size)++;
+    }
+}
 
-            if(current->qtd > current->next->qtd) {
+void boobleSort(char vector[], int qtd[], int size) {
 
-                int aux;
-                char auxc;
+    int flag = 0;
+    int i = size - 1;
 
-                aux = current->qtd;
-                current->qtd = current->next->qtd;
-                current->next->qtd = aux;
+    while(i >= 0) {
 
-                auxc = current->c;
-                current->c = current->next->c;
-                current->next->c = auxc;
+        for(int j = 0; j < size; j++) {
 
-                flag = 1;                
+            if(qtd[j] > qtd[j + 1]) {
+               
+                int aux = qtd[j]; 
+                char c = vector[j];
+
+                vector[j] = vector[j + 1];
+                qtd[j] = qtd[j + 1];
+
+                vector[j + 1] = c;
+                qtd[j + 1] = aux;
+
+                flag = 1;
             }
-            else if(current->qtd == current->next->qtd & current->c > current->next->c ) {
 
-                int aux;
-                char auxc;
+            else if(qtd[j] == qtd[j + 1] && vector[j] > vector[j + 1]) {
+               
+                int aux = qtd[j]; 
+                char c = vector[j];
 
-                aux = current->qtd;
-                current->qtd = current->next->qtd;
-                current->next->qtd = aux;
+                vector[j] = vector[j + 1];
+                qtd[j] = qtd[j + 1];
 
-                auxc = current->c;
-                current->c = current->next->c;
-                current->next->c = auxc;
+                vector[j + 1] = c;
+                qtd[j + 1] = aux;
 
-                flag = 1;                
+                flag = 1;
             }
         }
 
         if(!flag) break;
+        i--;
     }
 }
 
-void bobbleSort(Huffman *vector[], int size) {
+void createLeafs(char vector[], int size, Huffman data[], int qtd[]) {
 
-    int flag = 0;
+    for(int i = 0; i < size; i++) {
 
-    for(int i = size; i >= 0; i--) {
+        data[i].data = vector[i];
+        data[i].oc = qtd[i];
+        data[i].one = NULL;
+        data[i].zero = NULL;
+    }
+}
 
-        for(int j = 0; vector[j+1] != NULL; j++) {
+Huffman *makeHuffman(char vector[], int qtd[], int size) {
 
-            if(vector[j]->data > vector[j+1]->data) {
+    Huffman *data = (Huffman*)malloc(size * sizeof(Huffman));
 
-                int aux;
-                aux = vector[j]->data;
-                vector[j]->data = vector[j+1]->data;
-                vector[j+1]->data = aux;
-                flag = 1;
-            }
+    createLeafs(vector, size, data, qtd);
+
+    while (size != 1) {
+        Huffman *aux = (Huffman *)malloc(sizeof(Huffman));
+        aux->data = '\0';
+        aux->oc = qtd[0] + qtd[1];
+        aux->one = &data[1];
+        aux->zero = &data[0];
+
+        for (int i = 0; i < size - 2; i++) {
+            data[i] = data[i + 2];
+            qtd[i] = qtd[i + 2];
         }
-        if(!flag) break;
-    }
-}
 
-Huffman* topHeap( Huffman *aux1, Huffman *aux2) {
+        data[size - 2] = *aux;
+        qtd[size - 2] = aux->oc;
+        qtd[size - 1] = 0;
 
-    Huffman *root = (Huffman*)malloc(sizeof(Huffman));
-
-    if(aux1->data >= aux2->data) {
-
-        root->zero = aux1;
-        root->one = aux2;
-    }
-    else {
+        int current = size - 3;
         
-        root->zero = aux2;
-        root->one = aux1;
-    }
-
-    return root;
-}
-
-Huffman* midHeap(Huffman *side, Array *first) {
-
-    Huffman *root = (Huffman*)malloc(sizeof(Huffman));
-    Huffman *otherSide = (Huffman*)malloc(sizeof(Huffman));
-
-    otherSide->data = first->c;
-    otherSide->one = NULL;
-    otherSide->zero = NULL;
-
-    if(otherSide->data >= side->data) {
-
-        root->zero = otherSide;
-        root->one = side;
-    } 
-    else {
-        root->zero = side;
-        root->one = otherSide;
-    }
-
-    root->data = first->qtd + side->data;
-
-    Array *aux = first;
-    first = first->next;
-    free(aux);
-
-    return root;
-}
-
-Huffman* minHeap(Array *first) {
-
-    Huffman *root = (Huffman*)malloc(sizeof(Huffman));
-    Huffman *aux1 = (Huffman*)malloc(sizeof(Huffman));
-    Huffman *aux2 = (Huffman*)malloc(sizeof(Huffman));
-    
-    
-    Array *min1 = first;
-    Array *min2 = first;
-
-    aux1->data = min1->c;
-    aux1->one = NULL;
-    aux1->zero = NULL;    
-    aux2->data = min2->c;
-    aux2->one = NULL;
-    aux2->zero = NULL;
-
-    
-    if(min2->qtd >= min2->qtd) {
-
-        root->zero = aux1;
-        root->one = aux2;
-    } 
-    else {
-        root->zero = aux2;
-        root->one = aux2;
-    }
-
-    root->data = min1->qtd + min2->qtd;
-    first = first->next->next;
-    free(min1);
-    free(min2);
-
-    return root;
-}
-
-void makeHuffman(Huffman *root, Array *first) {
-
-    int count = 0;
-    for(Array *current = first; current != NULL; current = current->next) count++;
-    
-    Huffman *vector[count]; 
-    int position = 0;
-
-    while (first != NULL) {
-        
-        if(first->qtd == first->next->qtd) {
-
-            vector[position] = minHeap(first);
-            position++;
-
-            if(first->qtd != first->next->qtd) {
-                vector[position] = midHeap(vector[position-1], first);
-                position++;
+        while (current >= 0) {
+            if (qtd[current] > aux->oc) {
+                qtd[current + 1] = qtd[current];
+                data[current + 1] = data[current];
+                qtd[current] = aux->data;
+                data[current] = *aux;
             }
-            bobbleSort(vector);
-        }
-        else if(first->qtd != first->next->qtd) {
-                vector[position] = midHeap(vector[position-1], first);
-                position++;
+            current--;
         }
 
+        size--;
     }
+
+    return &data[0];
+}
+
+void print2DUtil(Huffman* root) {
     
+    if (root == NULL)
+        return;
+ 
+    print2DUtil(root->one);
+
+    printf("\n %c", root->data);
+
+    print2DUtil(root->zero);
+}
+ 
+void print2D(Huffman* root) {
+    print2DUtil(root);
 }
 
-void add(Array *first, char c) {
-
-    Array *aux = (Array*)malloc(sizeof(Array));
-
-    Array *current = first;
-
-    int flag = 0;
-
-    if(current == NULL) {
-        aux->c = c;
-        aux->qtd = 1;
-        aux->next = NULL;
-        current = aux;
-        flag = 1;
-    }
-    else { 
-        while(current != NULL) {
-
-            if(current->c == c) {
-                current->qtd++;
-                flag = 1;
-            }
-            current = current->next;
-        }
-    }
-
-    if(!flag) {
-        aux->c = c;
-        aux->qtd++;
-        aux->next = NULL;
-        current = aux;
-    }
-}
 
 int main() {
 
@@ -233,18 +151,27 @@ int main() {
         exit(1);
     }
 
-    Array *first = NULL;
-    Huffman *root = NULL;
-    char c;
+    char c= fgetc(txt);
+    char vector[ASCII];
+    int qtd[ASCII];
+    int size = 0;
 
     while (!feof(txt)) {
         
-        c = fgetc(txt);
+      
 
-        add(first, c);
+        add(vector, qtd, c, &size);
+
+          c = fgetc(txt);
     }
 
-    makeHuffman(root, first);
+    boobleSort(vector, qtd, size);
+    
+    Huffman *root = makeHuffman(vector, qtd, size);
+
+    print2D(root);
+
+    fclose(txt);
 
     return 0;
 }
