@@ -141,8 +141,8 @@ void codeFile(FILE *txt, Huffman *root) {
 
     while (!feof(txt)) {
         if (c != '\n') {
-            char aux[8];
-            char path[8];
+            char aux[20];
+            char path[20];
             findCodeLetter(root, aux, c, 0, path);
             fputs(path, code);
         }
@@ -196,6 +196,30 @@ void decodeFile(FILE *txt, Huffman *root) {
     fclose(decode);
 }
 
+//PRINT
+void print(Huffman *root, char *cod, int depth) {
+    
+    if(root == NULL) return;
+
+    if (root->data != '\0') {
+        cod[depth] = '\0';
+        printf("%c: %s\n", root->data, cod);
+        return;
+    }
+
+    if (root->zero != NULL) {
+        cod[depth] = '0';
+        print(root->zero, cod, depth + 1);
+    }
+
+    if (root->one != NULL) {
+        cod[depth] = '1';
+        print(root->one, cod, depth + 1);
+    }
+
+    return;
+}
+
 int main() {
 
     FILE *txt = fopen("amostra.txt", "r"); 
@@ -203,8 +227,8 @@ int main() {
     if (txt == NULL) exit(1);
 
     char c= fgetc(txt);
-    char vector[ASCII];
-    int qtd[ASCII];
+    char vector[ASCII] = {0};
+    int qtd[ASCII] = {0};
     int size = 0;
 
     //LER O ARQUIVO
@@ -253,6 +277,10 @@ int main() {
 
         root->zero = aux;
     }
+
+    //PRINT DOS CODIGO
+    char empty[20] = {0};
+    print(root, empty, 0);
 
     //RESETA O PONTEIRO DO ARQUIVO
     rewind(txt);
