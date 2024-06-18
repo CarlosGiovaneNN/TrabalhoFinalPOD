@@ -96,7 +96,7 @@ void makeHuffman(Huffman *array[], int size) {
         array[size - 2] = aux;
 
         //ORDENANDO
-        for (int i = size - 2; i > 0 && array[i - 1]->oc > array[i]->oc; i--) {
+        for (int i = size - 2; i > 0 && array[i - 1]->oc >= array[i]->oc; i--) {
 
             Huffman *auxData = array[i];
             array[i] = array[i - 1];
@@ -233,7 +233,7 @@ int main() {
 
     //LER O ARQUIVO
     while (!feof(txt)) {
-        add(vector, qtd, c, &size);
+        if(c != '\n') add(vector, qtd, c, &size);
         c = fgetc(txt);
     }
 
